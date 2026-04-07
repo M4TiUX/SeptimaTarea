@@ -210,3 +210,140 @@
   });
 
 })()
+
+
+//Codigo escrito por mi
+async function getPropiedades () {
+   try {
+    const response = await fetch('https://si0sgs.github.io/EstateAgency/datos/propiedades.json');
+    const data = await response.json();
+    const contenedor = document.getElementById("datosPropiedades");
+    contenedor.innerHTML = "";
+    //let bloque = "";
+
+    data.propiedades.forEach(propiedades => {
+      let bloque = `
+      <div class="col-md-4">
+            <div class="card-box-a card-shadow">
+              <div class="img-box-a">
+                <img src="${propiedades.imagen}" alt="" class="img-a img-fluid">
+              </div>
+              <div class="card-overlay">
+                <div class="card-overlay-a-content">
+                  <div class="card-header-a">
+                    <h2 class="card-title-a">
+                      <a href="#">${propiedades.clasificacion}</a>
+                    </h2>
+                    <p class="link-a">${propiedades.descripcion}</p>
+                  </div>
+                  <div class="card-body-a">
+                    <div class="price-box d-flex">
+                      <span class="price-a">${propiedades.tipo} | $ ${propiedades.precio}</span>
+                    </div>
+                  </div>
+                  <div class="card-footer-a">
+                    <ul class="card-info d-flex justify-content-around">
+                      <li>
+                        <h4 class="card-info-title">Area</h4>
+                        <span>${propiedades.detalle.area}m
+                          <sup>2</sup>
+                        </span>
+                      </li>
+                      <li>
+                        <h4 class="card-info-title">Rooms</h4>
+                        <span>${propiedades.detalle.rooms}</span>
+                      </li>
+                      <li>
+                        <h4 class="card-info-title">Floors</h4>
+                        <span>${propiedades.detalle.floors}</span>
+                      </li>
+                      <li>
+                        <h4 class="card-info-title">Garages</h4>
+                        <span>${propiedades.detalle.garages}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      `;
+      contenedor.innerHTML += bloque;
+    });
+
+   } catch (error) {
+    console.log(error);
+   }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  getPropiedades();
+})
+
+//Clima
+let lat = 0;
+let lon = 0;
+
+function obtenerUbicacion() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (pos) {
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+
+            console.log("Lat:", lat);
+            console.log("Lon:", lon);
+        });
+    } else {
+        alert("Geolocalización no soportada");
+    }
+}
+
+function obtenerClima() {
+
+    const apiKey = "0cec5882ee22b742fb791a26bdbf39f5";
+
+    $.ajax({
+        url: `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=es`,
+        method: "GET",
+        success: function (data) {
+            console.log(data);
+
+            mostrarDatos(data);
+        },
+        error: function () {
+            alert("Error al obtener el clima");
+        }
+    });
+}
+
+function mostrarDatos(data) {
+
+    $("#lug").text(data.name);
+
+    $("#tem").text(data.main.temp + " °C");
+
+    $("#hum").text(data.main.humidity + " %");
+
+    $("#vie").text(data.wind.speed + " m/s");
+
+    let icono = data.weather[0].icon;
+
+    $("#tiempoIcon").attr(
+      "src",
+      `https://openweathermap.org/img/wn/${icono}@2x.png`
+    );
+}
+
+$(document).ready(function () {
+
+    obtenerUbicacion();
+
+    // Espera un poco para asegurar que ya tenga lat/lon
+    setTimeout(() => {
+        obtenerClima();
+    }, 2000);
+});
+
+$("#tblw").click(function () {
+    obtenerClima();
+});
